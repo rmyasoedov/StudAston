@@ -1,8 +1,8 @@
 package org.decryptor;
 
 public class Calc {
-    public static int factorial(int n) {
-        int result = 1;
+    public static long factorial(int n) {
+        long result = 1;
         for (int i = 1; i <= n; i++) {
             result *= i;
         }
@@ -11,7 +11,8 @@ public class Calc {
 
     public static double valueTriangle(double a, double b, double c) {
         double p = (a + b + c) / 2;
-        return Math.sqrt(p * (p - a) * (p - b) * (p - c));
+        double value = Math.sqrt(p * (p - a) * (p - b) * (p - c));
+        return Math.round(value * 100) / 100.0;
     }
 
     public static boolean compare(int a, int b) {
