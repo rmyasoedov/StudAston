@@ -71,6 +71,7 @@ public class MtsTest {
 
         String currentUrl = driver.getCurrentUrl();
 
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", link);
         link.click();
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
