@@ -1,10 +1,7 @@
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.*;
 import io.github.bonigarcia.wdm.WebDriverManager;
-import java.time.Duration;
-import java.util.*;
 
 public class BaseTest {
     protected static WebDriver driver;
