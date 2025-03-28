@@ -6,12 +6,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import utils.Convertor;
-
 import java.time.Duration;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class PaymentsPage {
     private final WebDriver driver;
@@ -28,44 +24,53 @@ public class PaymentsPage {
 
     private final By logoPaymentsLocator = By.cssSelector(".cards-brands__container img");
 
-    public PaymentsPage(WebDriver driver, String phone, String sum, String email){
+    public PaymentsPage(WebDriver driver){
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        verifySendData(phone, sum, email);
     }
 
-    public PaymentsPage verifySendData(String phone, String sum, String email){
-        var description = getWaitingElement(payDescriptionLocator);
-        var cost = getWaitingElement(payCostLocator);
-        var button = getWaitingElement(payButtonLocator);
-
-        assertEquals(Convertor.formatAmount(sum) + " BYN", cost.getText());
-        assertEquals("Оплата: Услуги связи Номер:375"+phone, description.getText());
-        assertEquals("Оплатить "+Convertor.formatAmount(sum)+" BYN", button.getText());
-        return this;
+    public String getDescriptionText(){
+        return getWaitingElement(payDescriptionLocator).getText();
     }
 
-    public PaymentsPage checkPlaceholderIframe(){
-        checkPlaceholder(cardNumberLocator, "Номер карты");
-        checkPlaceholder(expirationDateLocator, "Срок действия");
-        checkPlaceholder(cvcLocator, "CVC");
-        checkPlaceholder(nameCardLocator, "Имя держателя (как на карте)");
-        return this;
+    public String getSumText(){
+        return getWaitingElement(payCostLocator).getText();
     }
 
-    public PaymentsPage checkLogoPayments(){
-        List<WebElement> logos = driver.findElements(logoPaymentsLocator);
-        assertEquals(5, logos.size(), "Неверное количество логотипов платежных систем");
-        var totalDisplayed = logos.stream().filter(WebElement::isDisplayed).count();
-        assertEquals(4, totalDisplayed, "Неверное количество видимых логотипов");
-        return this;
+    public String getButtonText(){
+        return getWaitingElement(payButtonLocator).getText();
     }
 
-    private void checkPlaceholder(By fieldLocator, String needText){
-        var field = driver.findElements(fieldLocator);
-        assertFalse(field.isEmpty(), "Элемент не найден");
-        assertTrue(field.get(0).isDisplayed(), "Элемент не отображается на экране");
-        assertEquals(needText, field.get(0).getText());
+    public String getCardNumberPlaceholder(){
+        return getPlaceholderElement(cardNumberLocator);
+    }
+
+    public String getExpirationDatePlaceholder(){
+        return getPlaceholderElement(expirationDateLocator);
+    }
+
+    public String getCvcPlaceholder(){
+        return getPlaceholderElement(cvcLocator);
+    }
+
+    public String getNameCardPlaceholder(){
+        return getPlaceholderElement(nameCardLocator);
+    }
+
+    private String getPlaceholderElement(By element){
+        return getWaitingElement(element).getText();
+    }
+
+    private List<WebElement> getLogos(){
+        return driver.findElements(logoPaymentsLocator);
+    }
+
+    public int getAllLogosSize (){
+        return getLogos().size();
+    }
+
+    public long getDisplayedLogosSize(){
+        return getLogos().stream().filter(WebElement::isDisplayed).count();
     }
 
     private WebElement getWaitingElement(By element){

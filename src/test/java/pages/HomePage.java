@@ -3,9 +3,12 @@ package pages;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import utils.Field;
+
 import java.time.Duration;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,142 +35,113 @@ public class HomePage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
-    public void verifyTitleBlock() {
+    public String getTitlePaymentBlock() {
         WebElement h2Element = driver.findElement(titleBlockLocator);
-        String actualText = h2Element.getText();
-        String expectedText = "Онлайн пополнение\nбез комиссии";
-        assertEquals(expectedText, actualText, "Текст блока не соответствует");
+        return h2Element.getText();
     }
 
-    public void verifyLogoPayments() {
-        var expectedLogos = List.of("Visa", "Verified By Visa", "MasterCard", "MasterCard Secure Code", "Белкарт");
-        List<WebElement> logos = driver.findElements(logoLocator);
-        String[] altArray = logos.stream().map(img -> img.getAttribute("alt")).toArray(String[]::new);
-        assertEquals(expectedLogos.size(), altArray.length, "Не соответствует количество логотипов");
-        assertTrue(logos.stream().allMatch(WebElement::isDisplayed), "Не все логотипы видны");
-        for (String logo : expectedLogos) {
-            assertTrue(List.of(altArray).contains(logo), "Нет лого: " + logo);
-        }
+    public List<String> getDisplayedLogos() {
+        return driver.findElements(logoLocator)
+                .stream()
+                .filter(WebElement::isDisplayed)
+                .map(img -> img.getAttribute("alt"))
+                .collect(Collectors.toList());
     }
 
-    public HelperPage clickOnPaymentLink() {
-        WebElement link = wait.until(ExpectedConditions.elementToBeClickable(linkLocator));
-        assertTrue(link.isDisplayed(), "Ссылка не отображается");
-        assertTrue(link.isEnabled(), "Ссылка неактивна");
+    public int getLogosCount() {
+        return driver.findElements(logoLocator).size();
+    }
 
-        acceptCookies();
+    public WebElement helperLink(){
+        return wait.until(ExpectedConditions.elementToBeClickable(linkLocator));
+    }
 
-        String currentUrl = driver.getCurrentUrl();
-        assertTrue(link.isDisplayed(), "Ссылка не видна");
+    public String getHelperLinkText(){
+        return helperLink().getText();
+    }
 
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", link);
-        link.click();
+    public boolean isShowHelperLink(){
+        return helperLink().isDisplayed();
+    }
 
-        wait.until(ExpectedConditions.not(ExpectedConditions.urlToBe(currentUrl)));
+    public boolean isEnabledHelperLink(){
+        return helperLink().isDisplayed();
+    }
+
+    public void clickHelperLink(){
+        helperLink().click();
+    }
+
+    public void scrollToLink(){
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", helperLink());
+    }
+
+    public String getHomeUrl(){
+        return driver.getCurrentUrl();
+    }
+
+    public HelperPage getHelperPage(String prevUrl){
+        wait.until(ExpectedConditions.not(ExpectedConditions.urlToBe(prevUrl)));
         return new HelperPage(driver);
     }
 
-    public void fillIncorrectPaymentForm() {
+    public void waitForPageToLoad(){
         wait.until(ExpectedConditions.titleContains(HOME_TITLE));
-        acceptCookies();
-
-        formFields(
-                "Домашний интернет",
-                new Field("internet-phone","Номер абонента", List.of("Необходимо указать номер в формате +375 00 ХХХ-ХХ-ХХ")),
-                new Field("internet-sum", "Сумма",List.of("Введите сумму платежа")),
-                new Field("internet-email", "E-mail для отправки чека",List.of("Введите корректный адрес электронной почты.")),
-                "pay-internet"
-        );
-
-        formFields(
-                "Услуги связи",
-                new Field("connection-phone", "Номер телефона",List.of("Номер телефона указан неверно","Введите номер телефона")),
-                new Field("connection-sum", "Сумма",List.of("Введите сумму платежа")),
-                new Field("connection-email", "E-mail для отправки чека",List.of("Введите корректный адрес электронной почты.")),
-                "pay-connection"
-        );
-
-        formFields(
-                "Рассрочка",
-                new Field("score-instalment", "Номер счета на 44",List.of("Введите корректный номер лицевого счета")),
-                new Field("instalment-sum", "Сумма",List.of("Введите сумму платежа")),
-                new Field("instalment-email", "E-mail для отправки чека",List.of("Введите корректный адрес электронной почты.")),
-                "pay-instalment"
-        );
-
-        formFields(
-                "Задолженность",
-                new Field("score-arrears", "Номер счета на 2073",List.of("Введите корректный номер лицевого счета")),
-                new Field("arrears-sum", "Сумма",List.of("Введите сумму платежа")),
-                new Field("arrears-email", "E-mail для отправки чека",List.of("Введите корректный адрес электронной почты.")),
-                "pay-arrears"
-        );
+        doneCookie();
     }
 
-    private void formFields(String option, Field numberField, Field sumField, Field emailField, String formId){
-        selectOption(option);
+    public String getPlaceholderElement(Field field){
+        return driver.findElement(field.getField()).getAttribute("placeholder");
+    }
+
+    public void clickButtonContinue(String formId){
         By submitButton = By.cssSelector("#"+formId+" button.button__default[type='submit']");
-
-        overwriteField(numberField.getField(), "0");
-        overwriteField(sumField.getField(), "0");
-        overwriteField(emailField.getField(), "0");
-
-        assertEquals(numberField.placeholder,  driver.findElement(numberField.getField()).getAttribute("placeholder"));
-        assertEquals(sumField.placeholder,  driver.findElement(sumField.getField()).getAttribute("placeholder"));
-        assertEquals(emailField.placeholder,  driver.findElement(emailField.getField()).getAttribute("placeholder"));
         driver.findElement(submitButton).click();
-        checkMessage(numberField);
-        checkMessage(sumField);
-        checkMessage(emailField);
     }
 
-    private void selectOption(String type){
+    public void selectOption(String type){
         driver.findElement(selectButton).click();
         WebElement option = driver.findElement(By.xpath("//li[contains(@class, 'select__item')]/p[text()='"+type+"']"));
         option.click();
     }
 
-    private void checkMessage(Field field){
-        List<WebElement> errorLocators = driver.findElements(By.xpath("//input[@id='" + field.id + "']/parent::div//p"));
-
-        assertEquals(field.errors.size(), errorLocators.size(), "Количество ошибок не совпадает");
-        for (int i = 0; i < field.errors.size(); i++) {
-            assertEquals(field.errors.get(i), errorLocators.get(i).getText(), "Ошибка не совпадает");
-        }
+    private List<WebElement> errorMessages(Field field){
+        return
+           driver.findElements(By.xpath("//input[@id='" + field.id + "']/parent::div//p"));
     }
 
-    static class Field{
-        final String id;
-        final List<String> errors;
-        final String placeholder;
-
-        public Field(String fieldId, String placeholder, List<String> errors){
-            this.id = fieldId;
-            this.placeholder = placeholder;
-            this.errors = errors;
-        }
-
-        public By getField(){ return By.id(id); }
+    public int getCountErrors(Field field){
+        return errorMessages(field).size();
     }
 
+    public String getTextErrorMessage(Field field, int index){
+        return errorMessages(field).get(index).getText();
+    }
 
-    public PaymentsPage fillPaymentForm(String phone, String sum, String email) {
-        wait.until(ExpectedConditions.titleContains(HOME_TITLE));
-        acceptCookies();
-        selectOption("Услуги связи");
-
+    public void fillPaymentForm(String phone, String sum, String email){
         overwriteField(inputPhoneConnection, phone);
         overwriteField(inputSumConnection, sum);
         overwriteField(inputEmailConnection, email);
-
-        driver.findElement(buttonConnection).click();
-
-        switchToIframe();
-
-        return new PaymentsPage(driver, phone, sum, email);
     }
 
-    private void overwriteField(By field, String value){
+    public void clickButtonConnection(){
+        driver.findElement(buttonConnection).click();
+    }
+
+    public boolean loadPaymentsPage(){
+        try {
+            wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(iframeLocator));
+        }catch (TimeoutException e){
+            return false;
+        }
+        return true;
+    }
+
+    public void overwriteField(Field field, String value){
+        overwriteField(field.getField(), value);
+    }
+
+    public void overwriteField(By field, String value){
         try{
             driver.findElement(field).clear();
             driver.findElement(field).sendKeys(value);
@@ -176,18 +150,10 @@ public class HomePage {
         }
     }
 
-    private void acceptCookies() {
+    public void doneCookie() {
         List<WebElement> cookieButton = driver.findElements(cookieButtonLocator);
         if (!cookieButton.isEmpty() && cookieButton.get(0).isDisplayed()) {
             cookieButton.get(0).click();
-        }
-    }
-
-    private void switchToIframe(){
-        try {
-            wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(iframeLocator));
-        }catch (TimeoutException e){
-            fail("Iframe оплаты счета не найден");
         }
     }
 }
