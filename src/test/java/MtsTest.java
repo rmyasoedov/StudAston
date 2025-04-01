@@ -92,7 +92,7 @@ public class MtsTest extends BaseTest {
         homePage.waitForPageToLoad();
         formFields(
                 "Домашний интернет",
-                new Field("internet-phone","Номер абонента", List.of("*Необходимо указать номер в формате +375 00 ХХХ-ХХ-ХХ")),
+                new Field("internet-phone","Номер абонента", List.of("Необходимо указать номер в формате +375 00 ХХХ-ХХ-ХХ")),
                 new Field("internet-sum", "Сумма",List.of("Введите сумму платежа")),
                 new Field("internet-email", "E-mail для отправки чека",List.of("Введите корректный адрес электронной почты.")),
                 "pay-internet"
