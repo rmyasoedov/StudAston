@@ -1,6 +1,7 @@
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import pages.HomePage;
@@ -8,6 +9,7 @@ import pages.PaymentsPage;
 
 import java.time.Duration;
 
+@ExtendWith(TestListener.class)
 public class BaseTest {
     protected static WebDriver driver;
     protected static HomePage homePage;
@@ -21,6 +23,7 @@ public class BaseTest {
     public static void setUp() {
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
+        TestListener.setDriver(driver);
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         driver.get("https://www.mts.by/");
         homePage = new HomePage(driver);
